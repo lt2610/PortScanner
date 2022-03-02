@@ -54,7 +54,7 @@ Args:
 
   if '--protocol' in argv :
     try:
-      s_protocol = argv[argv.index('--protocol')+1]
+      s_protocol = str(argv[argv.index('--protocol')+1]).upper()
       if s_protocol=='TCP':protocol = TCP
       elif s_protocol=='UDP':protocol = UDP
       elif s_protocol=='ICMP'or s_protocol=='RAW'or s_protocol=='IP':protocol = ICMP
@@ -79,6 +79,12 @@ Args:
       min_port, max_port = s_port, s_port
     except IndexError:quit('Error -> Port not find.')
 
+  if '--filter' in argv or '-f' in argv :
+    try:
+      filter = str(argv[argv.index('--filter' if '--filter' in argv else '-f')+1]).lower()
+      ... if (filter=='all')or(filter=='open')or(filter=='closed') else quit('Error -> filter not find.')
+    except IndexError:quit('Error -> filter not find.')
+
   print(f"""
 {'-'.center(wt,'-')}
 {('Scanning : '+hostname).center(wt,' ')}
@@ -86,13 +92,19 @@ Args:
 {'-'.center(wt,'-')}
 """)
   for port in range(int(min_port), int(max_port)+1 ):
-    status= 'open ' if check_port_open((hostname, port),protocol) else 'closed'
+    port_status = check_port_open((hostname, port),protocol)
+    status = 'open ' if port_status else 'closed'
+    if filter == 'open' : 
+      if port_status == False : continue
+    elif filter == 'closed' : 
+      if port_status : continue
     
     if protocol==UDP:sleep(.12)
     mrg = 8
     print('\n'+f"{' '*mrg}Port {port}"+' '.center((wt-((6+mrg+len(str(port)))+(len(status)+7))),' ')+f"{status}{' '*mrg}")
-  print('\r')
-except KeyboardInterrupt:quit("\nExiting...")
+  print(end='\r\n')
+except KeyboardInterrupt:quit("\n")
+except EOFError:pass
 except gaierror:quit("The hostname couldn't be resolved.")
 except TypeError:quit(ErrArgv)
 except ValueError:quit(ErrArgv)

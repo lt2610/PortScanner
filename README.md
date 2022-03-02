@@ -24,6 +24,7 @@ git clone https://github.com/MSFPT/PortScanner
 | `--minimum-port` or `-min-port` | minimum port | optional |
 | `--maximum-port` or `-max-port` | maximum port | optional |
 | `--protocol` | `TCP` / `UDP` | optional |
+| `--filter` or `-f` | `all` / `open` / `closed` | optional |
 
 <br>
 
@@ -123,6 +124,54 @@ python3 PortScanner -h github.com -p 6060 --protocol UDP
 **Scan:** Port 6060
 
 **Protocol:** `UDP`
+
+<br>
+
+```
+python3 PortScanner --hostname github.com --filter all
+```
+
+```
+python3 PortScanner -h github.com -f all
+```
+
+**Usage:** Python3 PortScanner [hostname] [filter]
+
+**Scan:** All Ports
+
+**Protocol:** `TCP`
+
+<br>
+
+```
+python3 PortScanner --hostname github.com --filter open
+```
+
+```
+python3 PortScanner -h github.com -f open
+```
+
+**Usage:** Python3 PortScanner [hostname] [filter]
+
+**Scan:** All Ports open
+
+**Protocol:** `TCP`
+
+<br>
+
+```
+python3 PortScanner --hostname github.com --filter closed
+```
+
+```
+python3 PortScanner -h github.com -f closed
+```
+
+**Usage:** Python3 PortScanner [hostname] [filter]
+
+**Scan:** All Ports closed
+
+**Protocol:** `TCP`
 
 <br><br>
 
