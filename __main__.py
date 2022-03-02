@@ -44,6 +44,7 @@ Args:
    --maximum-port or -max-port # optional
    --minimum-port or -min-port # optional
    --protocol # TCP , UDP , ... # optional
+   --filter or -f # all , open , closed # optional
 \n{'-'*wt}
 ''')
 
