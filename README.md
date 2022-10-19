@@ -10,7 +10,7 @@ A tool which is capable of scanning ports as `TCP` & `UDP` and detecting open an
 
 ## Clone from GitHub
 ```bash
-git clone https://github.com/MSFPT/PortScanner
+git clone https://github.com/msfpt/PortScanner
 ```
 
 ## Example
