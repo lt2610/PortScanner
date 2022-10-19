@@ -1,14 +1,18 @@
 """
-:)
-~~~~~
+PortScanner
+~~~~~~~~~~~~
 Scan All Open Ports Of The Target IP
 """ if __name__ == '__main__' else quit()
 
-from os import get_terminal_size
-from datetime import datetime
 from time import sleep
-from sys import argv
+from datetime import datetime
+from os import get_terminal_size
+from sys import version_info, argv
 from socket import ( socket, gaierror, error, setdefaulttimeout, gethostbyname, AF_INET, SOCK_STREAM as TCP, SOCK_DGRAM as UDP, SOCK_RAW as ICMP )
+
+# if version_info <= (3, 7):
+#   class VersionError(SystemExit): 'return error due to old version'
+#   raise VersionError('please update your python. because this version is not suitable for running PortScanner.')
 
 def date():
   date = str(datetime.now()).split(' ')
@@ -16,27 +20,40 @@ def date():
   return ' '.join(date)
 
 try:
-  wt, ht = get_terminal_size()
+  columns_terminal, lines_terminal = get_terminal_size()
 except:
-  wt, ht = (80, 24)
+  columns_terminal, lines_terminal = (80, 24)  # Unix standard terminal size
 
-def check_port_open(__address: tuple,stype):
+class ConnectionError(SystemExit): "return error due to no connection"
+
+def check_port_open(__address: tuple, stype) -> bool:
   try:
     connection = socket(AF_INET, stype)
-    setdefaulttimeout(.7)
+    setdefaulttimeout(0.7)
     result = connection.connect_ex(__address)
     connection.close()
-    return True if result==0 else False
-  except error:quit("Couldn't connect to the server.")
+    return (result == 0)
+  except error:
+    raise ConnectionError("Couldn't connect to the server.")
 
-ErrArgv = "Invalid amount of arguments!>\nSyntax: python3 PortScanner --help"
+def argv_error() -> 0 :
+  class ArgumentsError(SystemExit): "return error due to invalid arguments"
+  raise ArgumentsError("Invalid amount of arguments!\nSyntax: python3 PortScanner --help")
 
 try:
-  if (len(argv) <= 1):quit(ErrArgv)
+  
+  if (len(argv) <= 1): argv_error()
+  
   if (len(argv) == 2):
-    if argv[1]=='--developer' or argv[1]=='-D':quit("\n"+"GitHub : https://github.com/MSFPT/PortScanner".center(wt,' ')+"\n")
-    elif argv[1]=='--help' or argv[1]=='-H':quit(f'''
-{'[ Commands ]'.center(wt,'-')}\n
+    
+    if (argv[1] == '--developer') or (argv[1] == '-D') :
+      
+      print(f"\n"+"GitHub : https://github.com/msfpt".center(columns_terminal,' ')+"\n")
+      quit()
+      
+    elif (argv[1] == '--help') or (argv[1] == '-H') :
+      
+      print(f"""\n{'[ Commands ]'.center(columns_terminal,'-')}\n
 Usage: Python3 PortScanner [options] or [args...]
    --help or -H
    --developer or -D
@@ -48,67 +65,73 @@ Args:
    --minimum-port or -min-port # optional
    --protocol # TCP , UDP , ... # optional
    --filter or -f # all , open , closed # optional
-\n{'-'*wt}
-''')
+    \n{'-'*columns_terminal}\n""")
+    quit()
+  
+  def argv_not_find_error(argv_name: str = "argument") -> 0:
+    class ArgumentNotFindError(SystemExit): "return error due to argument not find"
+    raise ArgumentNotFindError(f"Error -> {argv_name} not find.")
 
-  if '--hostname' in argv or '-h' in argv :
-    try:hostname = gethostbyname(argv[argv.index('--hostname' if '--hostname' in argv else '-h')+1])
-    except IndexError:quit('Error -> hostname not find.')
-  else:quit('Error -> HostName not find.')
+  if ('--hostname' in argv) or ('-h' in argv) :
+    try: hostname = gethostbyname(argv[argv.index('--hostname' if ('--hostname' in argv) else '-h')+1])
+    except IndexError: argv_not_find_error("HostName")
+  else: argv_not_find_error("HostName")
 
-  if '--protocol' in argv :
+  if ('--protocol' in argv) :
     try:
       s_protocol = str(argv[argv.index('--protocol')+1]).upper()
-      if s_protocol=='TCP':protocol = TCP
-      elif s_protocol=='UDP':protocol = UDP
-      elif s_protocol=='ICMP'or s_protocol=='RAW'or s_protocol=='IP':protocol = ICMP
-      else:quit(f'Error -> {s_protocol} is not Protocol')
-    except IndexError:quit('Error -> Protocol not find.')
-  else:protocol = TCP
+      if (s_protocol == 'TCP') : protocol = TCP
+      elif (s_protocol == 'UDP') : protocol = UDP
+      elif (s_protocol == 'ICMP') or (s_protocol == 'RAW') or (s_protocol == 'IP'): protocol = ICMP
+      else: argv_not_find_error("Protocol")
+    except IndexError: argv_not_find_error("Protocol")
+  else: protocol = TCP
 
-  if '--minimum-port' in argv or '-min-port' in argv :
-    try:min_port = int(argv[argv.index('--minimum-port' if '--minimum-port' in argv else '-min-port')+1])
-    except IndexError:quit('Error -> MinPort not find.')
-  else:min_port = 1
+  if ('--minimum-port' in argv) or ('-min-port' in argv) :
+    try: min_port = int(argv[argv.index('--minimum-port' if ('--minimum-port' in argv) else '-min-port')+1])
+    except IndexError: argv_not_find_error("MinimumPort")
+  else: min_port = 1
 
 
   if '--maximum-port' in argv or '-max-port' in argv :
     try:max_port = int(argv[argv.index('--maximum-port' if '--maximum-port' in argv else '-max-port')+1])
-    except IndexError:quit('Error -> MaxPort not find.')
-  else:max_port = 65535
+    except IndexError: argv_not_find_error("MaximumPort")
+  else: max_port = 65535
 
-  if '--port' in argv or '-p' in argv :
+  if ('--port' in argv) or ('-p' in argv) :
+    try: min_port = max_port = argv[argv.index('--port' if ('--port' in argv) else '-p')+1]
+    except IndexError: argv_not_find_error("Port")
+
+  if ('--filter' in argv) or ('-f' in argv) :
     try:
-      s_port = argv[argv.index('--port' if '--port' in argv else '-p')+1]
-      min_port, max_port = s_port, s_port
-    except IndexError:quit('Error -> Port not find.')
+      filter = str(argv[argv.index('--filter' if ('--filter' in argv) else '-f')+1]).lower()
+      if not ((filter == 'all') or (filter == 'open') or (filter == 'closed')) : argv_not_find_error("Filter")
+    except IndexError: argv_not_find_error("Filter")
 
-  if '--filter' in argv or '-f' in argv :
-    try:
-      filter = str(argv[argv.index('--filter' if '--filter' in argv else '-f')+1]).lower()
-      ... if (filter=='all')or(filter=='open')or(filter=='closed') else quit('Error -> filter not find.')
-    except IndexError:quit('Error -> filter not find.')
-
-  print(f"""
-{'-'.center(wt,'-')}
-{('Scanning : '+hostname).center(wt,' ')}
-{('Time started : '+date()).center(wt,' ')}
-{'-'.center(wt,'-')}
-""")
-  for port in range(int(min_port), int(max_port)+1 ):
-    port_status = check_port_open((hostname, port),protocol)
-    status = 'open ' if port_status else 'closed'
-    if filter == 'open' : 
-      if port_status == False : continue
-    elif filter == 'closed' : 
+  print(f"\n{'-'.center(columns_terminal,'-')}\n{('Scanning : '+hostname).center(columns_terminal,' ')}\n{('Time started : '+date()).center(columns_terminal,' ')}\n{'-'.center(columns_terminal,'-')}\n")
+  
+  for port in range(int(min_port), int(max_port)+1):
+    
+    port_status = check_port_open((hostname, port), protocol)
+    
+    if (filter == 'open') :
+      if not port_status : continue
+    elif (filter == 'closed') :
       if port_status : continue
     
-    if protocol==UDP:sleep(.12)
-    mrg = 8
-    print('\n'+f"{' '*mrg}Port {port}"+' '.center((wt-((6+mrg+len(str(port)))+(len(status)+7))),' ')+f"{status}{' '*mrg}")
-  print(end='\r\n')
-except KeyboardInterrupt:quit("\n")
-except EOFError:pass
-except gaierror:quit("The hostname couldn't be resolved.")
-except TypeError:quit(ErrArgv)
-except ValueError:quit(ErrArgv)
+    status = 'open ' if port_status else 'closed'
+    
+    if (protocol == UDP) : sleep(0.12)
+    
+    margin = 8
+    
+    print('\n'+f"{' '*margin}Port {port}"+' '.center((columns_terminal-((6+margin+len(str(port)))+(len(status)+7))),' ')+f"{status}{' '*margin}")
+  
+  print("\n")
+
+except gaierror:
+  raise ConnectionError("Error -> hostname couldn't be resolved.")
+except KeyboardInterrupt: quit("\n")
+except ValueError: argv_error()
+except TypeError: argv_error()
+except EOFError: pass
