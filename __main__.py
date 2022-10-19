@@ -15,7 +15,10 @@ def date():
   date[-1] = date[-1].split('.')[0]
   return ' '.join(date)
 
-wt, ht = get_terminal_size()
+try:
+  wt, ht = get_terminal_size()
+except:
+  wt, ht = (80, 24)
 
 def check_port_open(__address: tuple,stype):
   try:
