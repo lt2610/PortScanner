@@ -48,7 +48,7 @@ try:
     
     if (argv[1] == '--developer') or (argv[1] == '-D') :
       
-      print(f"\n"+"GitHub : https://github.com/msfpt".center(columns_terminal,' ')+"\n")
+      print(f"\n"+"GitHub : https://github.com/0x6D7366".center(columns_terminal,' ')+"\n")
       quit()
       
     elif (argv[1] == '--help') or (argv[1] == '-H') :
