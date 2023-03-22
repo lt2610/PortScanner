@@ -1,7 +1,4 @@
 # PortScanner
-<!-- 
-[![Python](https://img.shields.io/badge/python-3.8-blue)](https://python.org)
-![Level](https://img.shields.io/badge/Level-Easy-cyan) -->
 
 Scan All Open Ports Of The Target IP.
 
@@ -10,7 +7,7 @@ A tool which is capable of scanning ports as `TCP` & `UDP` and detecting open an
 
 ## Clone from GitHub
 ```bash
-git clone https://github.com/msfpt/PortScanner
+git clone https://github.com/0x6D7366/PortScanner
 ```
 
 ## Example
